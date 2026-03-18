@@ -14,6 +14,7 @@ import { ChatScreen } from '../screens/main/ChatScreen';
 import { NotificationsScreen } from '../screens/main/NotificationsScreen';
 import { NotificationSettingsScreen } from '../screens/main/NotificationSettingsScreen';
 import { AiChatScreen } from '../screens/main/AiChatScreen';
+import { VoiceDiaryScreen } from '../screens/main/VoiceDiaryScreen';
 import { colors } from '../theme/colors';
 
 export type MainStackParamList = {
@@ -31,6 +32,7 @@ export type MainStackParamList = {
   Notifications: undefined;
   NotificationSettings: undefined;
   AiChat: { conversationId?: string } | undefined;
+  VoiceDiary: undefined;
 };
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -56,6 +58,7 @@ export function MainStack() {
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="AiChat" component={AiChatScreen} />
+      <Stack.Screen name="VoiceDiary" component={VoiceDiaryScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );

@@ -25,6 +25,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.3",
     "node-vault": "^0.10.2",
+    "openai": "^6.32.0",
     "pino": "^8.21.0",
     "pino-http": "^10.3.0",
     "stripe": "^20.4.1",

@@ -54,6 +54,9 @@ const envSchema = z.object({
   AI_MODEL: z.string().default('claude-sonnet-4-20250514'),
   AI_MAX_TOKENS: z.coerce.number().default(4096),
 
+  // OpenAI (Whisper STT)
+  OPENAI_API_KEY: z.string().default(''),
+
   // Security
   EGN_SALT: z.string().min(32),
 });
