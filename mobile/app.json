@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "HOX",
+    "slug": "hox",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#4F46E5"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "bg.hox.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "HOX needs camera access for identity verification",
+        "NSFaceIDUsageDescription": "HOX uses Face ID to confirm payments"
+      }
+    },
+    "android": {
+      "package": "bg.hox.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#4F46E5"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-camera",
+      "expo-local-authentication"
+    ]
+  }
+}
