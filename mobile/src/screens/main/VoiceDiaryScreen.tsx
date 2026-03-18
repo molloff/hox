@@ -7,7 +7,7 @@ import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { ScreenWrapper } from '../../components/ScreenWrapper';
 import {
-  uploadVoiceEntry, listEntries, askDiary,
+  uploadVoiceEntry, listEntries, askDiary, askDiaryVoice, readEntryAloud,
   type DiaryEntry,
 } from '../../services/voiceDiary';
 import { colors } from '../../theme/colors';
@@ -143,17 +143,65 @@ export function VoiceDiaryScreen() {
     }
   };
 
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  const playAudioBase64 = async (base64: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+      const uri = FileSystem.cacheDirectory + `tts_${Date.now()}.mp3`;
+      await FileSystem.writeAsStringAsync(uri, base64, { encoding: FileSystem.EncodingType.Base64 });
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      soundRef.current = sound;
+      setPlaying(true);
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) setPlaying(false);
+      });
+      await sound.playAsync();
+    } catch {
+      setPlaying(false);
+    }
+  };
+
+  const stopPlayback = async () => {
+    if (soundRef.current) {
+      await soundRef.current.stopAsync();
+      setPlaying(false);
+    }
+  };
+
   const handleAsk = async () => {
     if (!question.trim() || asking) return;
     setAsking(true);
     setAiAnswer(null);
     try {
-      const answer = await askDiary(question.trim());
-      setAiAnswer(answer);
+      if (voiceMode) {
+        const result = await askDiaryVoice(question.trim());
+        setAiAnswer(result.answer);
+        await playAudioBase64(result.audioBase64);
+      } else {
+        const answer = await askDiary(question.trim());
+        setAiAnswer(answer);
+      }
     } catch {
       setAiAnswer('Грешка — опитай отново.');
     } finally {
       setAsking(false);
+    }
+  };
+
+  const handleReadAloud = async (entryId: string) => {
+    try {
+      setPlaying(true);
+      const result = await readEntryAloud(entryId);
+      await playAudioBase64(result.audioBase64);
+    } catch {
+      setPlaying(false);
+      Alert.alert('Грешка', 'Гласовото четене не успя');
     }
   };
 
@@ -187,6 +235,15 @@ export function VoiceDiaryScreen() {
         </View>
       )}
 
+      {item.transcript_status === 'done' && (
+        <Pressable
+          style={styles.readAloudBtn}
+          onPress={() => playing ? stopPlayback() : handleReadAloud(item.id)}
+        >
+          <Text style={styles.readAloudText}>{playing ? '⏹ Спри' : '🔊 Прочети на глас'}</Text>
+        </Pressable>
+      )}
+
       {item.transcript_status === 'processing' && (
         <View style={styles.processingRow}>
           <ActivityIndicator size="small" color={colors.primary} />
@@ -218,18 +275,38 @@ export function VoiceDiaryScreen() {
             multiline
             maxLength={2000}
           />
+
+          {/* Voice response toggle */}
+          <Pressable style={styles.voiceToggle} onPress={() => setVoiceMode(!voiceMode)}>
+            <Text style={styles.voiceToggleText}>
+              {voiceMode ? '🔊 Гласов отговор' : '📝 Текстов отговор'}
+            </Text>
+          </Pressable>
+
           <Pressable
             style={[styles.askBtn, (!question.trim() || asking) && styles.askBtnDisabled]}
             onPress={handleAsk}
             disabled={!question.trim() || asking}
           >
             {asking ? <ActivityIndicator color={colors.white} /> : (
-              <Text style={styles.askBtnText}>Попитай</Text>
+              <Text style={styles.askBtnText}>{voiceMode ? '🎙 Попитай с глас' : 'Попитай'}</Text>
             )}
           </Pressable>
+
           {aiAnswer && (
             <View style={styles.answerBox}>
-              <Text style={styles.answerLabel}>🤖 HOX AI:</Text>
+              <View style={styles.answerHeader}>
+                <Text style={styles.answerLabel}>🤖 HOX AI:</Text>
+                {playing ? (
+                  <Pressable onPress={stopPlayback}>
+                    <Text style={styles.playBtn}>⏹ Спри</Text>
+                  </Pressable>
+                ) : voiceMode ? (
+                  <Pressable onPress={() => handleAsk()}>
+                    <Text style={styles.playBtn}>🔊 Пусни пак</Text>
+                  </Pressable>
+                ) : null}
+              </View>
               <Text style={styles.answerText}>{aiAnswer}</Text>
             </View>
           )}
@@ -330,6 +407,19 @@ const styles = StyleSheet.create({
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
   tag: { backgroundColor: colors.primaryLight, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   tagText: { fontSize: 12, fontWeight: '600', color: colors.primary },
+  readAloudBtn: {
+    marginTop: 10, paddingVertical: 8, alignItems: 'center',
+    borderTopWidth: 1, borderTopColor: colors.border,
+  },
+  readAloudText: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  voiceToggle: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    marginTop: 10, paddingVertical: 8, borderRadius: 10,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  voiceToggleText: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  answerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  playBtn: { fontSize: 13, fontWeight: '600', color: colors.primary },
   processingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   processingText: { fontSize: 12, color: colors.textMuted, marginLeft: 8 },
   empty: { alignItems: 'center', paddingTop: 60 },

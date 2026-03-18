@@ -44,3 +44,24 @@ export async function askDiary(question: string): Promise<string> {
   const { data } = await api.post('/diary/ask', { question });
   return data.answer;
 }
+
+export interface VoiceResponse {
+  answer: string;
+  audioBase64: string;
+  audioMimeType: string;
+}
+
+export async function askDiaryVoice(question: string, voice = 'nova'): Promise<VoiceResponse> {
+  const { data } = await api.post('/diary/ask-voice', { question, voice });
+  return data;
+}
+
+export async function readEntryAloud(entryId: string, voice = 'nova'): Promise<VoiceResponse> {
+  const { data } = await api.post(`/diary/entries/${entryId}/read-aloud`, { voice });
+  return data;
+}
+
+export async function textToSpeech(text: string, voice = 'nova', speed = 1.0): Promise<string> {
+  const { data } = await api.post('/diary/tts', { text, voice, speed });
+  return data.audioBase64;
+}
