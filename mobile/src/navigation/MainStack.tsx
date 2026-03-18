@@ -11,6 +11,8 @@ import { DealDetailScreen } from '../screens/main/DealDetailScreen';
 import { IndexScreen } from '../screens/main/IndexScreen';
 import { ConnectScreen } from '../screens/main/ConnectScreen';
 import { ChatScreen } from '../screens/main/ChatScreen';
+import { NotificationsScreen } from '../screens/main/NotificationsScreen';
+import { NotificationSettingsScreen } from '../screens/main/NotificationSettingsScreen';
 import { colors } from '../theme/colors';
 
 export type MainStackParamList = {
@@ -25,6 +27,8 @@ export type MainStackParamList = {
   Index: undefined;
   Connect: undefined;
   Chat: { conversationId: string; userId: string };
+  Notifications: undefined;
+  NotificationSettings: undefined;
 };
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -47,6 +51,8 @@ export function MainStack() {
       <Stack.Screen name="Index" component={IndexScreen} />
       <Stack.Screen name="Connect" component={ConnectScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );

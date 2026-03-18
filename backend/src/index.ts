@@ -13,6 +13,8 @@ import { logger } from './utils/logger.js';
 import './services/bus.service.js';
 // Import index-engine to register bus→index event listeners
 import './services/index-engine.service.js';
+// Import notification scheduler to register bus→push listeners
+import './services/notification-scheduler.service.js';
 
 const app = express();
 
