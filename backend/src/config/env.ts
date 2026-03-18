@@ -49,6 +49,11 @@ const envSchema = z.object({
   // AML
   AML_DEAL_LIMIT_EUR: z.coerce.number().default(5000),
 
+  // Anthropic
+  ANTHROPIC_API_KEY: z.string().default(''),
+  AI_MODEL: z.string().default('claude-sonnet-4-20250514'),
+  AI_MAX_TOKENS: z.coerce.number().default(4096),
+
   // Security
   EGN_SALT: z.string().min(32),
 });

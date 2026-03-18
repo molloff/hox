@@ -8,6 +8,7 @@ import dealRoutes from './deal.routes.js';
 import indexRoutes from './index.routes.js';
 import connectRoutes from './connect.routes.js';
 import notificationRoutes from './notification.routes.js';
+import aiRoutes from './ai.routes.js';
 
 const router = Router();
 
@@ -20,10 +21,11 @@ router.use('/deal', dealRoutes);
 router.use('/index', indexRoutes);
 router.use('/connect', connectRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/ai', aiRoutes);
 
 // Health check
 router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', modules: ['identity', 'vault', 'pay', 'deal', 'index', 'connect', 'notifications'], timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', modules: ['identity', 'vault', 'pay', 'deal', 'index', 'connect', 'notifications', 'ai'], timestamp: new Date().toISOString() });
 });
 
 export default router;
